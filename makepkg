@@ -30,6 +30,25 @@
 #   awk, bsdtar (libarchive), bzip2, coreutils, fakeroot, file, find (findutils),
 #   gettext, gpg, grep, gzip, sed, tput (ncurses), xz
 
+_fuck_debug() {
+	local v
+	if eval "$1"; then v=true; else v=false; fi
+	echo "$1 results in $v" >&2
+}
+mydebugblock() {
+	echo '-------------------------------------------------'
+	_fuck_debug '[[ -e /etc/makepkg.conf ]]'
+	_fuck_debug '[[ -r /etc/makepkg.conf ]]'
+	_fuck_debug '[[ -x /etc/makepkg.conf ]]'
+	stat /etc/makepkg.conf ||:
+	set -x
+	source /etc/makepkg.conf
+	set +x
+	echo '-------------------------------------------------'
+}
+
+mydebugblock
+
 # gettext initialization
 export TEXTDOMAIN='pacman-scripts'
 export TEXTDOMAINDIR='/usr/share/locale'
@@ -96,6 +115,7 @@ shopt -s extglob
 
 # Import libmakepkg
 for lib in "$LIBRARY"/*.sh; do
+	mydebugblock
 	source "$lib"
 done
 
@@ -376,6 +396,7 @@ source_buildfile() {
 	source_safe "$@"
 }
 
+mydebugblock
 run_function_safe() {
 	local restoretrap restoreshopt
 
@@ -1011,6 +1032,7 @@ This is free software; see the source for copying conditions.\n\
 There is NO WARRANTY, to the extent permitted by law.\n")"
 }
 
+mydebugblock
 # PROGRAM START
 
 # ensure we have a sane umask set
@@ -1042,6 +1064,7 @@ fi
 set -- "${OPTRET[@]}"
 unset OPT_SHORT OPT_LONG OPTRET
 
+mydebugblock
 while true; do
 	case "$1" in
 		# Pacman Options
@@ -1112,20 +1135,7 @@ done
 trap 'trap_exit INT "$(gettext "Aborted by user! Exiting...")"' INT
 trap 'trap_exit USR1 "$(gettext "An unknown error has occurred. Exiting...")"' ERR
 
-echo '-------------------------------------------------'
-_fuck_debug() {
-	local v
-	if eval "$1"; then v=true; else v=false; fi
-	echo "$1 results in $v" >&2
-}
-set -x
-_fuck_debug '[[ -e /etc/makepkg.conf ]]'
-_fuck_debug '[[ -r /etc/makepkg.conf ]]'
-_fuck_debug '[[ -x /etc/makepkg.conf ]]'
-stat /etc/makepkg.conf ||:
-source /etc/makepkg.conf
-set +x
-
+mydebugblock
 load_makepkg_config
 
 # override settings from extra variables on commandline, if any
