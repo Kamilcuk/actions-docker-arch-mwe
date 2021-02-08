@@ -1,7 +1,6 @@
 #!/bin/bash
 set -x
 #set -euo pipefail
-export SHELLOPTS
 
 exec 2>&1
 
