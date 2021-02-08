@@ -1,5 +1,9 @@
 #!/bin/bash
-set -xeuo pipefail
+set -x
+#set -euo pipefail
+export SHELLOPTS
+
+exec 2>&1
 
 if [ ! -e /.dockerenv ]; then echo "error: this script is meant to be in docker" >&2; exit 2; fi
 
@@ -10,7 +14,7 @@ user_gid=1000
 pacman-key --init
 echo "[multilib]" >> /etc/pacman.conf
 echo "Include = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
-pacman --noconfirm --needed -Syyu base-devel git go
+pacman --noconfirm --needed -Syyu base-devel git go strace
 
 groupadd --gid $user_gid $username
 useradd -mrs /bin/bash --uid $user_uid --gid $user_gid $username
@@ -20,10 +24,13 @@ chmod 0440 /etc/sudoers.d/$username
 work() {
 	stat /etc/makepkg.conf ||:
 	wc /etc/makepkg.conf ||:
+	bash -c 'wc /etc/makepkg.conf' ||:
 	cd ~
 	git clone --depth 1 https://aur.archlinux.org/yay.git
 	cd yay
-	makepkg --noprogressbar --noconfirm -si
+	makepkg --noprogressbar --noconfirm -si ||:
+	bash -x makepkg --noprogressbar --noconfirm -si ||:
+	strace bash -x makepkg --noprogressbar --noconfirm -si ||:
 	yay -Syyu --removemake --noprogressbar --noconfirm --needed cowsay archivemount
 	cowsay "Hello, World!"
 }
