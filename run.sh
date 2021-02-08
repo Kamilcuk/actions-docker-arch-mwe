@@ -12,10 +12,7 @@ echo "[multilib]" >> /etc/pacman.conf
 echo "Include = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
 pacman --noconfirm --needed -Syyu base-devel git go
 
-groupadd --gid $user_gid $username
-useradd -mrs /bin/bash --uid $user_uid --gid $user_gid $username
-echo "$username ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/$username
-chmod 0440 /etc/sudoers.d/$username
+sed -i -e 's/if (( EUID == 0 )); then/if false; then/' /usr/bin/makepkg
 
 work() {
 	stat /etc/makepkg.conf ||:
@@ -27,9 +24,4 @@ work() {
 	yay -Syyu --removemake --noprogressbar --noconfirm --needed cowsay archivemount
 	cowsay "Hello, World!"
 }
-sudo -u builder bash -s <<EOF
-set -xeuo pipefail
-$(declare -f work)
 work
-EOF
-
