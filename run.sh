@@ -32,6 +32,10 @@ if [[ -r /etc/makepkg.conf ]]; then echo readable here; fi
 )
 
 work() {
+if [[ -r /etc/makepkg.conf ]]; then echo readable here; fi
+(
+	if [[ -r /etc/makepkg.conf ]]; then echo readable here; fi
+)
 	stat /etc/makepkg.conf ||:
 	wc /etc/makepkg.conf ||:
 	bash -c 'wc /etc/makepkg.conf' ||:
