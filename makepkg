@@ -37,6 +37,9 @@ _fuck_debug() {
 }
 mydebugblock() {
 	echo '-------------------------------------------------'
+	( set -x
+	id||:;who||:;whoami||:;
+	)
 	_fuck_debug '[[ -e /etc/makepkg.conf ]]'
 	_fuck_debug '[[ -r /etc/makepkg.conf ]]'
 	_fuck_debug '[[ -x /etc/makepkg.conf ]]'
