@@ -1,6 +1,6 @@
 #!/bin/bash
-set -x
 #set -euo pipefail
+set -x
 
 exec 2>&1
 
@@ -20,16 +20,21 @@ useradd -mrs /bin/bash --uid $user_uid --gid $user_gid $username
 echo "$username ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/$username
 chmod 0440 /etc/sudoers.d/$username
 
+pwd
+echo "Overwrite makepkg binary"
+cp -va ./makepkg /usr/bin/makepkg
+
 work() {
 	stat /etc/makepkg.conf ||:
 	wc /etc/makepkg.conf ||:
 	bash -c 'wc /etc/makepkg.conf' ||:
+	stat /usr/bin/makepkg ||:
+	whereis makepkg ||:
 	cd ~
 	git clone --depth 1 https://aur.archlinux.org/yay.git
 	cd yay
 	makepkg --noprogressbar --noconfirm -si ||:
-	bash -x makepkg --noprogressbar --noconfirm -si ||:
-	strace bash -x makepkg --noprogressbar --noconfirm -si ||:
+	strace bash makepkg --noprogressbar --noconfirm -si ||:
 	yay -Syyu --removemake --noprogressbar --noconfirm --needed cowsay archivemount
 	cowsay "Hello, World!"
 }
