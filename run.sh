@@ -23,6 +23,13 @@ chmod 0440 /etc/sudoers.d/$username
 pwd
 echo "Overwrite makepkg binary"
 cp -va ./makepkg /usr/bin/makepkg
+mount ||:
+findmnt ||:
+
+if [[ -r /etc/makepkg.conf ]]; then echo readable here; fi
+(
+	if [[ -r /etc/makepkg.conf ]]; then echo readable here; fi
+)
 
 work() {
 	stat /etc/makepkg.conf ||:
@@ -33,6 +40,9 @@ work() {
 	cd ~
 	git clone --depth 1 https://aur.archlinux.org/yay.git
 	cd yay
+	mount ||:
+	findmnt ||:
+	. makepkg --noprogressbar --noconfirm -si ||:
 	makepkg --noprogressbar --noconfirm -si ||:
 	strace bash makepkg --noprogressbar --noconfirm -si ||:
 	yay -Syyu --removemake --noprogressbar --noconfirm --needed cowsay archivemount
